@@ -1,0 +1,27 @@
+services:
+  active-row:
+    container_name: 'active-row'
+    image: sidewave/php:8.3-apache
+    ports:
+      - '80:80'
+    environment:
+      - APACHE_DOCUMENT_ROOT=/var/www/html/www
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: bash -c 'if [ ! -f /var/www/html/bootstrap.local.php ]; then cp /var/www/html/bootstrap.local.example.php /var/www/html/bootstrap.local.php; fi && composer install -o && apache2ctl -D FOREGROUND'
+    volumes:
+      - ./:/var/www/html
+
+  mariadb.server:
+    image: mariadb:10.5
+    environment:
+      MYSQL_ROOT_PASSWORD: 'nette-database'
+      MYSQL_DATABASE: 'nette-database'
+    ports:
+      - '3306:3306'
+    volumes:
+      - mariadbData:/var/lib/mysql
+      - ./database:/docker-entrypoint-initdb.d
+
+volumes:
+  mariadbData:
